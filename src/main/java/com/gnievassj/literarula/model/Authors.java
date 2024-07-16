@@ -1,13 +1,15 @@
 package com.gnievassj.literarula.model;
 
+import com.gnievassj.literarula.service.IFormatoDatos;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 @Entity
 @Table(name="authors")
-public class Authors {
+public class Authors implements IFormatoDatos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,8 +22,10 @@ public class Authors {
     public Authors(){}
     public Authors(DataAuthors dataAuthors){
         this.name = dataAuthors.name();
-        this.birthYear = OptionalInt.of(dataAuthors.birthYear()).orElse(0);
-        this.deathYear = OptionalInt.of(dataAuthors.deathYear()).orElse(0);
+        //this.birthYear = OptionalInt.of(dataAuthors.birthYear()).orElse(0);
+        //this.deathYear = OptionalInt.of(dataAuthors.deathYear()).orElse(0);
+        this.birthYear = dataAuthors.birthYear();
+        this.deathYear = dataAuthors.deathYear();
     }
     public Long getId() {return id;}
 
@@ -48,28 +52,29 @@ public class Authors {
 
     @Override
     public String toString() {
-//        return "Authors{" +
-//                "id=" + id +
-//                ", name='" + name + '\'' +
-//                ", birthYear=" + birthYear +
-//                ", deathYear=" + deathYear +
-//                ", books=" + books +
-//                '}';
-        return """
-                ----- Autor -----
-                Nombre: %s
-                Año nacimiento: %d
-                Año muerte: %d
-                -----------------
-                """.formatted(name,birthYear,deathYear);
+        return "Authors{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", birthYear=" + Optional.ofNullable(birthYear).map(String::valueOf).orElse("No data")+
+                ", deathYear=" + Optional.ofNullable(deathYear).map(String::valueOf).orElse("No data")+
+                ", books=" + books +
+                '}';
     }
+    @Override
     public String formato(){
-        return """
+        //String authorBirthYear = (birthYear != null) ? birthYear.toString() : "No data";
+        //String authorDeathYear = (deathYear != null) ? deathYear.toString() : "No data";
+        return  """
                 ----- Autor -----
                 Nombre: %s
-                Año nacimiento: %d
-                Año muerte: %d
+                Año nacimiento: %s
+                Año muerte: %s
                 -----------------
-                """.formatted(name,birthYear,deathYear);
+                """
+                .formatted(
+                        name,
+                        Optional.ofNullable(birthYear).map(String::valueOf).orElse("No data"),
+                        Optional.ofNullable(deathYear).map(String::valueOf).orElse("No data")
+                );
     }
 }
