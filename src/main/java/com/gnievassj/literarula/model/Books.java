@@ -8,8 +8,10 @@ public class Books {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     private String title;
     @ManyToOne
+    @JoinColumn(name="author_id")
     private Authors author;
     private String language;
     private Double downloadCount;
@@ -52,11 +54,12 @@ public class Books {
     }
     public String formato(){
         return """
-                ----- LIBRO -----
+                ------- LIBRO -------
                 Titulo: %s
                 Autor: %s
                 Idioma: %s
                 Num de descargas: %f
+                ---------------------
                 """.formatted(title,author.getName(),language,downloadCount);
     }
 }

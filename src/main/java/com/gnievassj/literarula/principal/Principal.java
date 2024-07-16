@@ -3,10 +3,11 @@ package com.gnievassj.literarula.principal;
 import com.gnievassj.literarula.model.Authors;
 import com.gnievassj.literarula.model.Books;
 import com.gnievassj.literarula.model.DataResults;
-import com.gnievassj.literarula.repository.AuthorsRepository;
-import com.gnievassj.literarula.repository.BooksRepository;
+import com.gnievassj.literarula.service.AuthorsService;
+import com.gnievassj.literarula.service.BooksService;
 import com.gnievassj.literarula.service.ConsumoAPI;
 import com.gnievassj.literarula.service.ConvierteDatos;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.Scanner;
 
@@ -15,11 +16,11 @@ public class Principal {
     private final ConsumoAPI consumoApi = new ConsumoAPI();
     private final ConvierteDatos conversor = new ConvierteDatos();
     private final String URL_BASE = "https://gutendex.com/books/";
-    private BooksRepository booksRepository;
-    private AuthorsRepository authorsRepository;
-    public Principal(BooksRepository booksRepository,AuthorsRepository authorsRepository){
-        this.booksRepository = booksRepository;
-        this.authorsRepository = authorsRepository;
+    private BooksService booksService;
+    private AuthorsService authorsService;
+    public Principal(BooksService booksService,AuthorsService authorsService){
+        this.booksService = booksService;
+        this.authorsService = authorsService;
     }
 
     public void menu(){
@@ -73,25 +74,27 @@ public class Principal {
         String nombreLibro = teclado.nextLine();
         var json = consumoApi.obtenerDatos(URL_BASE+"?search="+nombreLibro.replace(" ","%20"));
         //System.out.println(json);
-        var datos = conversor.obtenerDatos(json, DataResults.class);
-        //System.out.println(datos);
-        var libro = datos.results().get(0);
-        var autor = libro.authors().get(0);
-        System.out.println(autor);
-        System.out.println(new Authors(autor).formato());
-        var author = new Authors(autor);
-        try{
-            authorsRepository.save(author);
-        }catch(Exception e){
-            e.getStackTrace();
-            System.out.println("Ya existe el autor.");
+        DataResults datos = null;
+        try {
+            datos = conversor.obtenerDatos(json, DataResults.class);
+            Books libro = new Books(datos.results().get(0));
+            booksService.save(libro);
+            System.out.println(libro.formato());
+            System.out.println("Libro guardado.");
+            teclado.nextLine();
         }
-        System.out.println(libro);
-        System.out.println(new Books(libro).formato());
-        var book = new Books(libro);
+        catch (IndexOutOfBoundsException e){
+            //e.printStackTrace();
+            System.out.println("No existe el libro.");
+        }
+        catch(UnexpectedRollbackException e) {
+            //e.printStackTrace();
+            System.out.println("Error al guarda el libro.");
+        }
     }
 
     private void listarLibrosRegistrados() {
+
     }
 
     private void listarAutoresRegistrados() {

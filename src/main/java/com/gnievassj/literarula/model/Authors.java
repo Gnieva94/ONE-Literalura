@@ -15,7 +15,7 @@ public class Authors {
     private String name;
     private Integer birthYear;
     private Integer deathYear;
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Books> books;
     public Authors(){}
     public Authors(DataAuthors dataAuthors){
@@ -41,7 +41,10 @@ public class Authors {
 
     public List<Books> getBooks() {return books;}
 
-    public void setBooks(List<Books> books) {this.books = books;}
+    public void setBooks(List<Books> books) {
+        books.forEach(b -> b.setAuthor(this));
+        this.books = books;
+    }
 
     @Override
     public String toString() {
