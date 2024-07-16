@@ -1,10 +1,13 @@
 package com.gnievassj.literarula.model;
 
+import com.gnievassj.literarula.service.IFormatoDatos;
 import jakarta.persistence.*;
+
+import java.util.Optional;
 
 @Entity
 @Table(name="books")
-public class Books {
+public class Books implements IFormatoDatos {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -13,13 +16,14 @@ public class Books {
     @ManyToOne
     @JoinColumn(name="author_id")
     private Authors author;
-    private String language;
+    @Enumerated(EnumType.STRING)
+    private Languages language;
     private Double downloadCount;
     public Books(){}
     public Books(DataBooks dataBooks){
         this.title = dataBooks.title();
         this.author = new Authors(dataBooks.authors().get(0));
-        this.language = dataBooks.languages().get(0);
+        this.language = Languages.fromData(dataBooks.languages().get(0));
         this.downloadCount = dataBooks.downloadCount();
     }
     public Long getId() {return id;}
@@ -34,9 +38,9 @@ public class Books {
 
     public void setAuthor(Authors author) {this.author = author;}
 
-    public String getLanguage() {return language;}
+    public Languages getLanguage() {return language;}
 
-    public void setLanguage(String language) {this.language = language;}
+    public void setLanguage(Languages language) {this.language = language;}
 
     public Double getDownloadCount() {return downloadCount;}
 
@@ -44,24 +48,17 @@ public class Books {
 
     @Override
     public String toString() {
-//        return "Books{" +
-//                "id=" + id +
-//                ", title='" + title + '\'' +
-//                ", author='" + author + '\'' +
-//                ", language='" + language + '\'' +
-//                ", downloadCount=" + downloadCount +
-//                '}';
-        return """
-                ------- LIBRO -------
-                Titulo: %s
-                Autor: %s
-                Idioma: %s
-                Num de descargas: %f
-                ---------------------
-                """.formatted(title,author.getName(),language,downloadCount);
+        return "Books{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", language='" + language + '\'' +
+                ", downloadCount=" + downloadCount +
+                '}';
     }
+    @Override
     public String formato(){
-        String authorName = (author != null)?author.getName():"Autor no disponible";
+        //String authorName = (author != null)?author.getName():"Autor no disponible";
         return """
                 ------- LIBRO -------
                 Titulo: %s
@@ -69,6 +66,12 @@ public class Books {
                 Idioma: %s
                 Num de descargas: %f
                 ---------------------
-                """.formatted(title,authorName,language,downloadCount);
+                """
+                .formatted(
+                        title,
+                        Optional.ofNullable(author).map(Authors::getName).orElse("No data"),
+                        language,
+                        downloadCount
+                );
     }
 }

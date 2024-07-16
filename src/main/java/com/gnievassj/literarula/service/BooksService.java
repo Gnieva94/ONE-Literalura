@@ -2,6 +2,7 @@ package com.gnievassj.literarula.service;
 
 import com.gnievassj.literarula.model.Authors;
 import com.gnievassj.literarula.model.Books;
+import com.gnievassj.literarula.model.Languages;
 import com.gnievassj.literarula.repository.AuthorsRepository;
 import com.gnievassj.literarula.repository.BooksRepository;
 import jakarta.transaction.Transactional;
@@ -26,5 +27,8 @@ public class BooksService {
     }
     public List<Books> getAllBooks(){
         return booksRepository.findAll();
+    }
+    public List<Books> getAllBooksByLanguage(Languages language){
+        return booksRepository.findByLanguage(language);
     }
 }
