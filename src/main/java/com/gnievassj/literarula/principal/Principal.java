@@ -3,10 +3,8 @@ package com.gnievassj.literarula.principal;
 import com.gnievassj.literarula.model.Authors;
 import com.gnievassj.literarula.model.Books;
 import com.gnievassj.literarula.model.DataResults;
-import com.gnievassj.literarula.service.AuthorsService;
-import com.gnievassj.literarula.service.BooksService;
-import com.gnievassj.literarula.service.ConsumoAPI;
-import com.gnievassj.literarula.service.ConvierteDatos;
+import com.gnievassj.literarula.model.Languages;
+import com.gnievassj.literarula.service.*;
 import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.List;
@@ -17,8 +15,8 @@ public class Principal {
     private final ConsumoAPI consumoApi = new ConsumoAPI();
     private final ConvierteDatos conversor = new ConvierteDatos();
     private final String URL_BASE = "https://gutendex.com/books/";
-    private BooksService booksService;
-    private AuthorsService authorsService;
+    private final BooksService booksService;
+    private final AuthorsService authorsService;
     public Principal(BooksService booksService,AuthorsService authorsService){
         this.booksService = booksService;
         this.authorsService = authorsService;
@@ -55,7 +53,7 @@ public class Principal {
                     listarAutoresRegistrados();
                     break;
                 case 4:
-                    listarAutoresVivoByAño();
+                    listarAutoresVivoByAnio();
                     break;
                 case 5:
                     listarLibrosByIdioma();
@@ -70,12 +68,22 @@ public class Principal {
         }while(opcion != 0);
     }
 
+    private <T extends IFormatoDatos> void listarDatos(List<T> lista){
+        if (!lista.isEmpty()){
+            lista.stream()
+                    .map(T::formato)
+                    .forEach(System.out::println);
+        }else {
+            System.out.println("No hay registros");
+        }
+    }
+
     private void buscarLibroPorTitulo() {
         System.out.println("Ingrese el nombre del libro que desea buscar: ");
         String nombreLibro = teclado.nextLine();
         var json = consumoApi.obtenerDatos(URL_BASE+"?search="+nombreLibro.replace(" ","%20"));
         //System.out.println(json);
-        DataResults datos = null;
+        DataResults datos;
         try {
             datos = conversor.obtenerDatos(json, DataResults.class);
             Books libro = new Books(datos.results().get(0));
@@ -96,26 +104,58 @@ public class Principal {
 
     private void listarLibrosRegistrados() {
         List<Books> listaLibros = booksService.getAllBooks();
-        if (!listaLibros.isEmpty()){
-            //System.out.println(listaLibros);
-            //System.out.println(listaLibros.get(0).formato());
-            //listaLibros.forEach(b -> System.out.println(b.formato()));
-            listaLibros.stream()
-                    .map(Books::formato)
-                    .forEach(System.out::println);
-
-        }else {
-            System.out.println("No hay registros");
-        }
-        teclado.nextLine();
+        listarDatos(listaLibros);
     }
 
     private void listarAutoresRegistrados() {
+        List<Authors> listaAutores = authorsService.getAllAuthors();
+        listarDatos(listaAutores);
     }
 
-    private void listarAutoresVivoByAño() {
+    private void listarAutoresVivoByAnio() {
+        System.out.println("Ingrese un año: ");
+        while(!teclado.hasNextInt()){
+            System.out.println("Invalido. Ingrese un numero.");
+            teclado.next();
+        }
+        var opcion = teclado.nextInt();
+        List<Authors> listaAutoresVivos = authorsService.getAuthorsAliveByYear(opcion);
+        listarDatos(listaAutoresVivos);
     }
 
     private void listarLibrosByIdioma() {
+        List<Books> listaLibrosPorIdioma;
+        var option=-1;
+        do {
+            var submenu = """
+                Idioma:
+                1 - Ingles
+                2 - Español
+                0 - Volver al menu
+                """;
+            System.out.println(submenu);
+            while(!teclado.hasNextInt()){
+                System.out.println("Invalido. Ingrese un numero.");
+                teclado.next();
+            }
+            option = teclado.nextInt();
+            teclado.nextLine();
+            Languages choise;
+            switch (option){
+                case 1:
+                    choise = Languages.fromEspanol("Ingles");
+                    listaLibrosPorIdioma = booksService.getAllBooksByLanguage(choise);
+                    listarDatos(listaLibrosPorIdioma);
+                    break;
+                case 2:
+                    choise = Languages.fromEspanol("Español");
+                    listaLibrosPorIdioma = booksService.getAllBooksByLanguage(choise);
+                    listarDatos(listaLibrosPorIdioma);
+                    break;
+                default:
+                    System.out.println("Opcion invalida.");
+                    break;
+            }
+        }while(option != 0);
     }
 }
