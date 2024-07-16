@@ -44,15 +44,13 @@ public class Books {
 
     @Override
     public String toString() {
-        return "Books{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", language='" + language + '\'' +
-                ", downloadCount=" + downloadCount +
-                '}';
-    }
-    public String formato(){
+//        return "Books{" +
+//                "id=" + id +
+//                ", title='" + title + '\'' +
+//                ", author='" + author + '\'' +
+//                ", language='" + language + '\'' +
+//                ", downloadCount=" + downloadCount +
+//                '}';
         return """
                 ------- LIBRO -------
                 Titulo: %s
@@ -61,5 +59,16 @@ public class Books {
                 Num de descargas: %f
                 ---------------------
                 """.formatted(title,author.getName(),language,downloadCount);
+    }
+    public String formato(){
+        String authorName = (author != null)?author.getName():"Autor no disponible";
+        return """
+                ------- LIBRO -------
+                Titulo: %s
+                Autor: %s
+                Idioma: %s
+                Num de descargas: %f
+                ---------------------
+                """.formatted(title,authorName,language,downloadCount);
     }
 }

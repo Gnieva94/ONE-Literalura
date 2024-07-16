@@ -9,6 +9,7 @@ import com.gnievassj.literarula.service.ConsumoAPI;
 import com.gnievassj.literarula.service.ConvierteDatos;
 import org.springframework.transaction.UnexpectedRollbackException;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
@@ -94,7 +95,19 @@ public class Principal {
     }
 
     private void listarLibrosRegistrados() {
+        List<Books> listaLibros = booksService.getAllBooks();
+        if (!listaLibros.isEmpty()){
+            //System.out.println(listaLibros);
+            //System.out.println(listaLibros.get(0).formato());
+            //listaLibros.forEach(b -> System.out.println(b.formato()));
+            listaLibros.stream()
+                    .map(Books::formato)
+                    .forEach(System.out::println);
 
+        }else {
+            System.out.println("No hay registros");
+        }
+        teclado.nextLine();
     }
 
     private void listarAutoresRegistrados() {

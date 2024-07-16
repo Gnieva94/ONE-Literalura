@@ -48,13 +48,20 @@ public class Authors {
 
     @Override
     public String toString() {
-        return "Authors{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", birthYear=" + birthYear +
-                ", deathYear=" + deathYear +
-                ", books=" + books +
-                '}';
+//        return "Authors{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", birthYear=" + birthYear +
+//                ", deathYear=" + deathYear +
+//                ", books=" + books +
+//                '}';
+        return """
+                ----- Autor -----
+                Nombre: %s
+                Año nacimiento: %d
+                Año muerte: %d
+                -----------------
+                """.formatted(name,birthYear,deathYear);
     }
     public String formato(){
         return """

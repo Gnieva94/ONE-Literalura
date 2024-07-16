@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.UnexpectedRollbackException;
 
+import java.util.List;
+
 @Service
 public class BooksService {
     @Autowired
@@ -21,5 +23,8 @@ public class BooksService {
                 .orElseGet(()-> authorsRepository.save(book.getAuthor()));
         book.setAuthor(author);
         booksRepository.save(book);
+    }
+    public List<Books> getAllBooks(){
+        return booksRepository.findAll();
     }
 }
